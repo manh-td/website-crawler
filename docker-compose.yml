@@ -1,0 +1,9 @@
+services:
+  app:
+    build: .
+    image: website-crawler:latest
+    container_name: website-crawler-container
+    volumes:
+      - .:/app       # Mount the current directory to the container's /app directory
+    stdin_open: true # Keep the container's standard input open
+    tty: true        # Allocate a pseudo-TTY
