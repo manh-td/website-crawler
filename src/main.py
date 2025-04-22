@@ -1,30 +1,32 @@
-from .utils import logging, search_websites, load_jsonl_to_list, dump_list_to_jsonl, list_to_dataframe
+from .utils import logging, search_websites, load_csv_to_dataframe
 from .config import OUTPUT_DIR
-import os, json
+import os
+import pandas as pd
 
 def main():
-    keywords = load_jsonl_to_list("src/keywords.jsonl")
-    logging.debug(json.dumps(keywords[0], indent=4))
+    keywords = load_csv_to_dataframe("src/packages.csv")
+    results = []
 
-    for item in keywords:
-        logging.debug(item["CWE_ID"])
-        websites = search_websites(item["Keywords"])
+    for _, item in keywords.iterrows():
+        logging.debug(item["CVE-ID"])
+        search_query = [f"{item['Package']} {item['Snapshot']} documentation"]
+        websites = search_websites(search_query)
         logging.debug(len(websites))
         websites = list(set(websites))
-        logging.debug(len(websites))
-        item["websites"] = websites
+        results.append({
+            "CVE-ID": item["CVE-ID"],
+            "Package": item["Package"],
+            "Snapshot": item["Snapshot"],
+            "Websites": websites
+        })
 
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    output_file = f"{OUTPUT_DIR}/websites.jsonl"
-    dump_list_to_jsonl(keywords, output_file)
-    logging.info(f"Websites have been written to {output_file}")
+    # Convert results to a DataFrame
+    results_df = pd.DataFrame(results)
 
-    for item in keywords:
-        item.pop("Keywords", None)
-
-    dataframe = list_to_dataframe(keywords)
-    dataframe.to_csv(f"{OUTPUT_DIR}/websites.csv", index=False)
-    logging.info(f"Dataframe has been saved to {OUTPUT_DIR}/websites.csv")
+    # Write to CSV
+    output_path = os.path.join(OUTPUT_DIR, "packages-documents.csv")
+    results_df.to_csv(output_path, index=False)
+    logging.info(f"Results written to {output_path}")
 
 if __name__ == "__main__":
     main()

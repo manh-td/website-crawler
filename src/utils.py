@@ -111,3 +111,21 @@ def list_to_dataframe(data):
     except Exception as e:
         logging.error(f"Error occurred while converting list of dictionaries to DataFrame: {e}")
         return pd.DataFrame()
+
+def load_csv_to_dataframe(file_path:str) -> pd.DataFrame:
+    """
+    Load a CSV file into a pandas DataFrame.
+
+    Args:
+        file_path (str): The path to the CSV file.
+
+    Returns:
+        pandas.DataFrame: A DataFrame containing the data from the CSV file.
+    """
+    try:
+        df = pd.read_csv(file_path)
+        logging.info(f"CSV file successfully loaded into DataFrame from {file_path}")
+        return df
+    except Exception as e:
+        logging.error(f"Error occurred while loading CSV file '{file_path}': {e}")
+        return pd.DataFrame()
